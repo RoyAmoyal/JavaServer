@@ -7,7 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Supplier;
 
-public abstract class BaseServer<T> implements Server<T> {
+public abstract class BaseServer<T> implements Server<T> { //this class contains the framework for Thread-Per-Client server
 
     private final int port;
     private final Supplier<MessagingProtocol<T>> protocolFactory;
@@ -24,6 +24,12 @@ public abstract class BaseServer<T> implements Server<T> {
         this.encdecFactory = encdecFactory;
 		this.sock = null;
     }
+
+    /*
+    This serve() function constantly attempts to accept new connections. Each socket produced by a new connection
+    is handed over to a BlockingConnectionHandler along with a MessagingProtocol and a MessageEncoderDecoder.
+    The newly created BlockingConnectionHandler is executed in it's own thread.
+     */
 
     @Override
     public void serve() {
@@ -49,6 +55,11 @@ public abstract class BaseServer<T> implements Server<T> {
 
         System.out.println("server closed!!!");
     }
+
+    /*
+   Note the close() function required by the Closeable interface - its implementation allows the BaseServer
+   class to be auto-closed in a try-with-resource statement.
+     */
 
     @Override
     public void close() throws IOException {
