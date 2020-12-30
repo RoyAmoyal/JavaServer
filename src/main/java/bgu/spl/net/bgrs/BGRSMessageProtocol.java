@@ -63,7 +63,7 @@ public class BGRSMessageProtocol implements MessagingProtocol<String> {
                     break;
                 }
                 Database dataBase = Database.getInstance();
-                // dataBase.logoutFromTheSystem(this.MyUser) WE NEED TO ADD  THIS METHOD
+                dataBase.logoutFromTheSystem(this.MyUser);
                 MyUser=null; //The client isn't logged-in as a user anymore.
             }
             case "05": //COURSEREG
