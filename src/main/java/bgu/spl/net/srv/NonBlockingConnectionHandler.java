@@ -31,6 +31,7 @@ public class NonBlockingConnectionHandler<T> implements ConnectionHandler<T> {
         this.protocol = protocol;
         this.reactor = reactor;
     }
+// pool bytebuffer
 
     public Runnable continueRead() {
         ByteBuffer buf = leaseBuffer();

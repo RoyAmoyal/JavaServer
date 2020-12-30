@@ -13,7 +13,6 @@ public abstract class User {
     }
 
     //The next methods are common to both Admin and Student users.
-
     public boolean isLoggedIn(){
         return login;
     }
@@ -29,6 +28,7 @@ public abstract class User {
     public String getUserName(){
         return userName;
     }
+
     public String getPassword(){
         return password;
     }

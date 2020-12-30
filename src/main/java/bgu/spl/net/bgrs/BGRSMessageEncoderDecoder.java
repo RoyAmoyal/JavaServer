@@ -8,19 +8,36 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
 
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
+    private int counterZeroBytes=0;
+    private int endMessageZeroBytes=-2; // -2 as default state.
+    String opcode;
+
 
 
     @Override
     public String decodeNextByte(byte nextByte) {
         //notice that the top 128 ascii characters have the same representation as their utf-8 counterparts
         //this allow us to do the following comparison
-        if (nextByte == '\n') { //?????????????????????????????
+
+        /*if (nextByte == '\0' && counterZeroBytes==endMessageZeroBytes ) { //END MESSAGE
             return popString();
-        }
+        }*/
+        if(endMessageZeroBytes==0)
 
         pushByte(nextByte);
+
+        if(len==2) { //we finished to read the opcode on the previous byte
+            opcode = opcodeIdenticator();
+            setEndMessageZeroBytesByOpcode(opcode);
+            if(endMessageZeroBytes==-1) // if the message doesn't contain '\0' for end message and it contains only the opcode.
+                return popString();
+        }
+
+
+
         return null; //not a line yet
     }
+
 
     @Override
     public byte[] encode(String message) {
@@ -31,7 +48,6 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
         if (len >= bytes.length) {
             bytes = Arrays.copyOf(bytes, len * 2);
         }
-
         bytes[len++] = nextByte;
     }
 
@@ -43,4 +59,48 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
         return result;
     }
 
+
+    //The 2 bytes of the opcode are encoding to string
+    private String opcodeIdenticator(){
+        String opcode = new String(bytes,0,2,StandardCharsets.UTF_8);
+        return opcode;
+    }
+
+    //This method defines how much zero bytes we should expect for that message to identify the end of the message.
+    private void setEndMessageZeroBytesByOpcode(String opcode){
+        /* int endMessageZeroBytes=
+        -2 as a default state. it should be changed after this method.
+        -1 if the message contains only opcode.
+         0 if the message contains opcode and string(of 2 bytes) --without-- '\0' char for the end of the message.
+         1 if the message contains opcode and string --with a single-- '\0' char for the end of the message.
+         2 if the message contains opcode and string (that splits by '\0' char to 2 substrings) --with two-- '\0' chars
+           and second appear of the '\0' char represents the end of the message.
+        */
+        switch(opcode) {
+            case "01":
+            case "02":
+            case "03": { // On this cases the the next bytes should contains '\0' when the second appear of '\0' its the end message char.
+                endMessageZeroBytes = 2;
+                break;
+            }
+            case "08": {
+                endMessageZeroBytes = 1;
+                break;
+            }
+            case "04": // message contains only opcode
+            case "11": {
+                endMessageZeroBytes = -1;
+                break;
+            }
+            case "05":
+            case "06":
+            case "07":
+            case "09":
+            case "10": {//message contains only opcode and courseName in the total exactly  4 bytes.
+                endMessageZeroBytes = 0;
+            }
+        }
+
+
+    }
 }

@@ -20,10 +20,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
      */
     public class Database {
         private final ConcurrentLinkedQueue<String> coursesList = new ConcurrentLinkedQueue<String>();
-        private ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>();
+        private ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
         private final Object registerLock = new Object();
         private final Object logInOutLock = new Object();
-        /*
+        /*admin3.getclass();
         MAYBE WE NEED TO ADD A LIST OF LOGGED IN BECAUSE IF 2 CLIENTS ARE TRYING TO LOG0
          */
 
@@ -74,7 +74,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
     /* return true if he manage to add new admin
                  or false if there is a user with that username that is already registered */
         public boolean addNewAdmin(String userName, String password) {
-            synchronized (registerLock) { // prevent 2 clients with the same name to register together
+            synchronized (registerLock) { // prevent 2 clients with the SAME NAME to register together
                 if (!usersList.containsKey(userName)) { // if we don't have a user with that userName
                     usersList.put(userName, new Admin(userName, password));
                     return true; // The synchronized aware of that return and will release the key.
@@ -95,27 +95,40 @@ import java.util.concurrent.ConcurrentLinkedQueue;
             }
         }
 
-         public User loginToTheSystem(String userName,String password) {
+
+         public boolean loginToTheSystem(String userName,String password) { //this method is called by the protocol assuming isLoggedIn return false to the protocol
              synchronized (logInOutLock) { // To prevent 2 clients to login in the same time, or one of them will logout while the other login.
                  //Checks if The user exists in the system and the password is correct and he doesn't already logged in.
-                 if (usersList.containsKey(userName) && usersList.get(userName).getPassword().equals(password)
-                         && !usersList.get(userName).isLoggedIn()){
+                 if (usersList.containsKey(userName) && usersList.get(userName).getPassword().equals(password)){
                      usersList.get(userName).logIn();
-                     return usersList.get(userName); // The client manage to login successfully with that username and password
+                     return true;
                  }
-                 return null; // The client didn't manage to login successfully for some reason.
+                 return false; // The client didn't manage to login successfully for some reason.
              }
          }
 
-        public boolean logoutFromTheSystem(User user){
-            if(usersList.get(user.getUserName()).isLoggedIn()){ //if the user is logged in then you can logout
-                usersList.get(user.getUserName()).logOut();
-                return true;
+
+         public boolean isloggedIn(String userName){
+             if(usersList.get(userName).isLoggedIn())
+                 return true;
+            else
+                return false;
+         }
+
+        public void logoutFromTheSystem(String userName){
+                usersList.get(userName).logOut();
             }
-            return false;
-        }
+
+
+
+
+
+
 
 
         }
+
+
+
 
 
