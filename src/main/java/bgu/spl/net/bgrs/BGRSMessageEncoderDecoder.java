@@ -8,10 +8,11 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
 
     private byte[] bytes = new byte[1 << 10]; //start with 1k
     private int len = 0;
-    private int counterZeroBytes=0;
+    private boolean secondZeroByte = false;
     private int endMessageZeroBytes=-2; // -2 as default state.
     String opcode;
 
+   01230 02131
 
 
     @Override
@@ -22,16 +23,31 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
         /*if (nextByte == '\0' && counterZeroBytes==endMessageZeroBytes ) { //END MESSAGE
             return popString();
         }*/
-        if(endMessageZeroBytes==0)
+
+        //End message per case without including the zero byte that indicates about the end of the message
+        if (nextByte == '\0' && endMessageZeroBytes == 1) {
+            return popString();
+        }
+
+        if(endMessageZeroBytes == 2 && nextByte == '\0'){
+            if(secondZeroByte) //if secondZeroByte=false its mean its the first time we encounter a zero byte so in the next zerobyte encounter we want to popString the message.
+                return popString();
+            secondZeroByte = true;
+        }
 
         pushByte(nextByte);
 
+        //End Message: for the cases we don't have a terminate byte.
         if(len==2) { //we finished to read the opcode on the previous byte
             opcode = opcodeIdenticator();
             setEndMessageZeroBytesByOpcode(opcode);
             if(endMessageZeroBytes==-1) // if the message doesn't contain '\0' for end message and it contains only the opcode.
                 return popString();
         }
+
+        if(len==4 && endMessageZeroBytes==0)
+            return popString();
+
 
 
 
@@ -87,11 +103,6 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
                 endMessageZeroBytes = 1;
                 break;
             }
-            case "04": // message contains only opcode
-            case "11": {
-                endMessageZeroBytes = -1;
-                break;
-            }
             case "05":
             case "06":
             case "07":
@@ -99,6 +110,12 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<String>{
             case "10": {//message contains only opcode and courseName in the total exactly  4 bytes.
                 endMessageZeroBytes = 0;
             }
+            case "04": // message contains only opcode
+            case "11": {
+                endMessageZeroBytes = -1;
+                break;
+            }
+
         }
 
 
