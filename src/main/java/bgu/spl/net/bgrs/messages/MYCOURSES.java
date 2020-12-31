@@ -2,13 +2,13 @@ package bgu.spl.net.bgrs.messages;
 
 public class MYCOURSES extends Message{
 
-    public MYCOURSES(short myOpCode) {
+    public MYCOURSES() {
         super.myOpCode = 11;
     }
 
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

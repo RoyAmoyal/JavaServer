@@ -2,7 +2,7 @@ package bgu.spl.net.bgrs.messages;
 
 public class UNREGISTER extends Message{
     private final int myCourseNumber;
-    public UNREGISTER(short myOpCode,int courseNumber) {
+    public UNREGISTER(int courseNumber) {
         super.myOpCode = 10;
         myCourseNumber = courseNumber;
     }
@@ -13,7 +13,7 @@ public class UNREGISTER extends Message{
 
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

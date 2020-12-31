@@ -15,7 +15,7 @@ public class ISREGISTERED extends Message{
     }
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 

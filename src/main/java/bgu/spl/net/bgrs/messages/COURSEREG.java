@@ -3,7 +3,7 @@ package bgu.spl.net.bgrs.messages;
 public class COURSEREG extends Message{
     private final int myCourseNumber;
 
-    public COURSEREG(short myOpCode,int courseNumber) {
+    public COURSEREG(int courseNumber) {
         super.myOpCode = 5;
         myCourseNumber = courseNumber;
     }
@@ -13,7 +13,7 @@ public class COURSEREG extends Message{
     }
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

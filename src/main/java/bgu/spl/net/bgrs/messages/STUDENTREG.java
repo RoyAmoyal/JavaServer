@@ -4,7 +4,7 @@ public class STUDENTREG extends Message{
     private final String myUserName;
     private final String myPassword;
 
-    public STUDENTREG(short myOpCode,String username,String password) {
+    public STUDENTREG(String username,String password) {
         super.myOpCode = 2;
         myUserName = username;
         myPassword = password;
@@ -20,7 +20,7 @@ public class STUDENTREG extends Message{
     }
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

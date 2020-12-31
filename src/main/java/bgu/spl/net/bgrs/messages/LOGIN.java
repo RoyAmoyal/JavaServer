@@ -4,7 +4,7 @@ public class LOGIN extends Message{
     private final String myUserName;
     private final String myPassword;
 
-    public LOGIN(short myOpCode,String username,String password) {
+    public LOGIN(String username,String password) {
         super.myOpCode = 3;
         myUserName = username;
         myPassword = password;
@@ -19,7 +19,7 @@ public class LOGIN extends Message{
     }
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

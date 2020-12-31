@@ -2,7 +2,7 @@ package bgu.spl.net.bgrs.messages;
 
 public class KDAMCHECK extends Message{
     private final int myCourseNumber;
-    public KDAMCHECK(short myOpCode,int courseNumber) {
+    public KDAMCHECK(int courseNumber) {
         super.myOpCode = 6;
         myCourseNumber = courseNumber;
     }
@@ -13,7 +13,7 @@ public class KDAMCHECK extends Message{
 
 
     @Override
-    public <T extends Message> T process(Class<T> type) {
+    public <T extends Message> T process() {
         return null;
     }
 }

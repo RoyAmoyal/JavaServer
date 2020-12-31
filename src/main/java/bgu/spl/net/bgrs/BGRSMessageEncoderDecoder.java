@@ -1,7 +1,6 @@
 package bgu.spl.net.bgrs;
 import bgu.spl.net.api.*;
-import bgu.spl.net.bgrs.messages.Message;
-import bgu.spl.net.bgrs.messages.STUDENTSTAT;
+import bgu.spl.net.bgrs.messages.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -15,9 +14,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private int endMessageZeroBytes=-2; // -2 as default state.
     private byte[] byteArrayAssistant;
     private short opcode;
-    private String messageUserName;
-    private String messagePassword;
+    private String userName;
+    private String password;
     private Message messageFromClient;
+    private int beginPointerForPassword;
 
     @Override
     public Message decodeNextByte(byte nextByte) {
@@ -36,11 +36,18 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
         if(endMessageZeroBytes == 2 && nextByte == '\0'){
             if(secondZeroByte) { //if secondZeroByte=false its mean its the first time we encounter a zero byte so in the next zerobyte encounter we want to popString the message.
-
+                password = new String(bytes, beginPointerForPassword, len, StandardCharsets.UTF_8);
+                if(opcode==1) //If its ADMINREG Message
+                    messageFromClient = new ADMINREG(userName,password);
+                else if(opcode==2)
+                    messageFromClient = new STUDENTREG(userName,password);
+                else
+                    messageFromClient = new LOGIN(userName,password);
                 return popMessage();
             }
-            messageUserName = new String(bytes, 2 , len, StandardCharsets.UTF_8);
+            userName = new String(bytes, 2 , len, StandardCharsets.UTF_8);
             secondZeroByte = true;
+            beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }
 
         pushByte(nextByte);
@@ -50,11 +57,20 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             opcode = opcodeDecoder();
             setEndMessageZeroBytesByOpcode(opcode);
             if(endMessageZeroBytes==-1) // if the message doesn't contain '\0' for end message and it contains only the opcode.
+                if(opcode==4)
+                    messageFromClient = new LOGOUT();
+                else
+                    messageFromClient = new MYCOURSES();
                 return popMessage();
         }
 
-        if(len==4 && endMessageZeroBytes==0)
+        if(len==4 && endMessageZeroBytes==0){
+            String courseName = new String(bytes, 2 , len, StandardCharsets.UTF_8);
+            if(opcode==5)
+                messageFromClient = new COURSEREG(courseName);
             return popMessage();
+
+        }
 
 
 
