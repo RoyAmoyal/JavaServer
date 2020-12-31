@@ -21,6 +21,7 @@ public class BGRSMessageProtocol implements MessagingProtocol<String> {
                 //Example message for cases 1,2,3: "02Amit\01234\0" , opcode = 02 , Username = Amit , Password = 1234;
                 case "01": //ADMINREG
                 {
+                    // WE CAN USE HERE Split of string..
                     String messageUserName = msg.substring(2, msg.indexOf('\0') - 1); // Don't forget to check about the index
                     String messagePassword = msg.substring(msg.indexOf('\0') + 1, msg.length() - 1);
                     Database dataBase = Database.getInstance();
