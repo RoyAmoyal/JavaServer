@@ -1,5 +1,7 @@
 package bgu.spl.net.bgrs.messages;
 
+import bgu.spl.net.bgrs.Database;
+
 public class STUDENTREG extends Message{
     private final String myUserName;
     private final String myPassword;
@@ -20,7 +22,11 @@ public class STUDENTREG extends Message{
     }
 
     @Override
-    public <T extends Message> T process() {
-        return null;
+    public Message process() {
+        Database dataBase = Database.getInstance();
+        if(!dataBase.addNewAdmin(myUserName,myPassword))
+            return new ERROR(myOpCode);
+        else
+            return new ACK(myOpCode,myUserName + " registered successfully as a new Student");
     }
 }

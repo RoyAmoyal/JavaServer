@@ -1,19 +1,25 @@
 package bgu.spl.net.bgrs.messages;
 
 public class ACK extends Message {
-    private final short returnedMessageOpcode;
+    private final short myReturnedMessageOpcode;
+    private final String myMessageReply;
 
-    public ACK(short messageSentOpcode) {
+    public ACK(short messageSentOpcode,String messageReply) {
         super.myOpCode = 12;
-        returnedMessageOpcode = messageSentOpcode;
+        myReturnedMessageOpcode = messageSentOpcode;
+        myMessageReply = messageReply;
     }
 
-    public short getReturnedMessageOpcode() {
-        return returnedMessageOpcode;
+    public short getMyReturnedMessageOpcode() {
+        return myReturnedMessageOpcode;
+    }
+
+    public String getMyMessageReply(){
+        return myMessageReply;
     }
 
     @Override
-    public <T extends Message> T process() {
+    public Message process() {
         return null;
     }
 }

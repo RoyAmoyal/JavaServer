@@ -1,33 +1,37 @@
 package bgu.spl.net.bgrs;
 import bgu.spl.net.api.*;
 import bgu.spl.net.bgrs.*;
+import bgu.spl.net.bgrs.messages.ADMINREG;
+import bgu.spl.net.bgrs.messages.*;
 import bgu.spl.net.bgrs.users.*;
 
-public class BGRSMessageProtocol implements MessagingProtocol<String> {
+public class BGRSMessageProtocol implements MessagingProtocol<Message> {
     private String MyUser=null;
     private boolean shouldTerminate = false;
 
 
 
-    private void commandIdenticator(String msg){
-
-    }
 
     @Override
-    public String process(String msg) {
-        String messageOPCODE = msg.substring(0,2);
+    public Message process(Message msg) {
 
-            switch(messageOPCODE) {
+
+        return msg.process();
+
+
+
+
+        switch(messageOPCODE) {
                 //Example message for cases 1,2,3: "02Amit\01234\0" , opcode = 02 , Username = Amit , Password = 1234;
-                case "01": //ADMINREG
+                case 1: //ADMINREG
                 {
-                    // WE CAN USE HERE Split of string..
-                    String messageUserName = msg.substring(2, msg.indexOf('\0') - 1); // Don't forget to check about the index
-                    String messagePassword = msg.substring(msg.indexOf('\0') + 1, msg.length() - 1);
+                    ADMINREG adminRegMessage = (ADMINREG) msg;
+                    String messageUserName = adminRegMessage.getAdminUserName();
+                    String messagePassword = adminRegMessage.getAdminPassword();
                     Database dataBase = Database.getInstance();
+                    Message response = msg.process();
                     if (!dataBase.addNewAdmin(messageUserName, messagePassword)) {
-                        // if we get false its mean there is already a registered user with that username so we should send an error message.
-                        // ERROR(opcode 01) MESSAGE should be send over here.
+                        return new
                         break;
                     }
                     //ACK-MESSAGE SHOULD BE SEND OVER HERE

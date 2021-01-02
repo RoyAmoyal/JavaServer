@@ -19,7 +19,7 @@ public class LOGIN extends Message{
     }
 
     @Override
-    public <T extends Message> T process() {
+    public Message process() {
         return null;
     }
 }

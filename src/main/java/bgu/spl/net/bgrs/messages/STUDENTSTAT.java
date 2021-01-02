@@ -2,7 +2,6 @@ package bgu.spl.net.bgrs.messages;
 
 public class STUDENTSTAT extends Message{
     public STUDENTSTAT() {
-
         super.myOpCode = 8;
     }
 

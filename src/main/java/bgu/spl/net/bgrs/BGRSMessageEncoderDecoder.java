@@ -4,6 +4,7 @@ import bgu.spl.net.bgrs.messages.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>{
@@ -12,7 +13,6 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
     private int len = 0;
     private boolean secondZeroByte = false;
     private int endMessageZeroBytes=-2; // -2 as default state.
-    private byte[] byteArrayAssistant;
     private short opcode;
     private String userName;
     private String password;
@@ -65,12 +65,22 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         }
 
         if(len==4 && endMessageZeroBytes==0){
-            String courseName = new String(bytes, 2 , len, StandardCharsets.UTF_8);
+            byte[] courseNumBytes = Arrays.copyOfRange(bytes,2,4); // not including the 4th cell.
+            short courseNum = bytesToShort(courseNumBytes);
             if(opcode==5)
-                messageFromClient = new COURSEREG(courseName);
+                messageFromClient = new COURSEREG(courseNum);
+            else if(opcode==6)
+                messageFromClient = new KDAMCHECK(courseNum);
+            else if(opcode==7)
+                messageFromClient = new COURSESTAT(courseNum);
+            else if(opcode==9)
+                messageFromClient = new ISREGISTERED(courseNum);
+            else if(opcode==10)
+                messageFromClient = new UNREGISTER(courseNum);
+            // finally
             return popMessage();
-
         }
+
 
 
 
@@ -93,6 +103,9 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     private Message popMessage() {
         len = 0;
+        secondZeroByte = false;
+        endMessageZeroBytes = -2;
+        opcode = -1;
         return messageFromClient;
     }
 
@@ -139,7 +152,19 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             }
 
         }
+    }
+    public short bytesToShort(byte[] byteArr)
+    {
+        short result = (short)((byteArr[0] & 0xff) << 8);
+        result += (short)(byteArr[1] & 0xff);
+        return result;
+    }
 
-
+    public byte[] shortToBytes(short num)
+    {
+        byte[] bytesArr = new byte[2];
+        bytesArr[0] = (byte)((num >> 8) & 0xFF);
+        bytesArr[1] = (byte)(num & 0xFF);
+        return bytesArr;
     }
 }

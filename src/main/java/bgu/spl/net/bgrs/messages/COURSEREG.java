@@ -1,9 +1,9 @@
 package bgu.spl.net.bgrs.messages;
 
 public class COURSEREG extends Message{
-    private final int myCourseNumber;
+    private final short myCourseNumber;
 
-    public COURSEREG(int courseNumber) {
+    public COURSEREG(short courseNumber) {
         super.myOpCode = 5;
         myCourseNumber = courseNumber;
     }
