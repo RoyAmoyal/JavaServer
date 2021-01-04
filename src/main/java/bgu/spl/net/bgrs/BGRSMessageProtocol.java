@@ -14,13 +14,17 @@ public class BGRSMessageProtocol implements MessagingProtocol<Message> {
 
     @Override
     public Message process(Message msg) {
+        Message returnedMessage = msg.process(this);
+        return returnedMessage; // we need to change the conditions here
+        //if(returnedMessage.equals(ACK.class))
+            //....
 
 
-        return msg.process();
 
 
 
 
+/*
         switch(messageOPCODE) {
                 //Example message for cases 1,2,3: "02Amit\01234\0" , opcode = 02 , Username = Amit , Password = 1234;
                 case 1: //ADMINREG
@@ -92,6 +96,8 @@ public class BGRSMessageProtocol implements MessagingProtocol<Message> {
 
 
         return " ";
+        */
+
     }
 
     @Override

@@ -1,12 +1,16 @@
 package bgu.spl.net.bgrs;
 
 
+import bgu.spl.net.bgrs.users.Course;
 import bgu.spl.net.bgrs.users.User;
 import bgu.spl.net.bgrs.users.Admin;
 import bgu.spl.net.bgrs.users.Student;
 import com.google.gson.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -19,10 +23,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
      * You can add private fields and methods to this class as you see fit.
      */
     public class Database {
-        private final ConcurrentLinkedQueue<String> coursesList = new ConcurrentLinkedQueue<String>();
-        private ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
+        private final ConcurrentHashMap<Short,Course> coursesList = new ConcurrentHashMap<>();
+        private final ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
+        private final ConcurrentHashMap<BGRSMessageProtocol,String> clientsLoggedIn = new ConcurrentHashMap<>();
         private final Object registerLock = new Object();
         private final Object logInOutLock = new Object();
+
         /*admin3.getclass();
         MAYBE WE NEED TO ADD A LIST OF LOGGED IN BECAUSE IF 2 CLIENTS ARE TRYING TO LOG0
          */
@@ -52,9 +58,29 @@ import java.util.concurrent.ConcurrentLinkedQueue;
          * into the Database, returns true if successful.
          */
     boolean initialize(String coursesFilePath) {
-        Gson g = new Gson();// we need to understand how to read from the gson
-        return false;
-    }
+        try {
+            File myFile = new File(coursesFilePath);
+            Scanner myReader = new Scanner(myFile);
+            int indexRow = 1;
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                loadNewCourse(indexRow, data);
+                indexRow++;
+            }
+        }catch(FileNotFoundException e){
+                e.printStackTrace();
+            }
+        return true;
+        }
+
+        private void loadNewCourse(int index, String data){
+            String[] fullCourseData = data.split("|");
+            short courseNum = Short.parseShort(fullCourseData[0]);
+            String courseName = fullCourseData[1];
+
+          //  while()
+         //   coursesList.add(new Course(),);
+        }
 
 
 
@@ -96,10 +122,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         }
 
 
-         public boolean loginToTheSystem(String userName,String password) { //this method is called by the protocol assuming isLoggedIn return false to the protocol
+         public boolean loginToTheSystem(String userName,String password, BGRSMessageProtocol client) { //this method is called by the protocol assuming isLoggedIn return false to the protocol
              synchronized (logInOutLock) { // To prevent 2 clients to login in the same time, or one of them will logout while the other login.
-                 //Checks if The user exists in the system and the password is correct and he doesn't already logged in.
+                 //if the user exists in the system and the password is correct
                  if (usersList.containsKey(userName) && usersList.get(userName).getPassword().equals(password)){
+                     clientsLoggedIn.put(client,userName);
                      usersList.get(userName).logIn();
                      return true;
                  }
@@ -107,21 +134,34 @@ import java.util.concurrent.ConcurrentLinkedQueue;
              }
          }
 
+         public void logoutFromTheSystem(BGRSMessageProtocol client){
+            String userToDisconnect = clientsLoggedIn.get(client); // gets the username of the user the client is logged in to.
+             usersList.get(userToDisconnect).logOut(); //logging out from the system
+             clientsLoggedIn.remove(client); // removes this client from the logged in clients list.
+         }
 
-         public boolean isloggedIn(String userName){
+         //methods that check login and courses list
+
+         public boolean isClientLoggedIn(BGRSMessageProtocol client){
+            if(clientsLoggedIn.containsKey(client))
+                return true;
+            else
+                return false;
+         }
+
+         public boolean isUserLoggedIn(String userName){
              if(usersList.get(userName).isLoggedIn())
                  return true;
             else
                 return false;
          }
 
-        public void logoutFromTheSystem(String userName){
-                usersList.get(userName).logOut();
-            }
-
-
-
-
+        public boolean isCourseExist(short courseNum){
+            if(coursesList.contains(courseNum))
+                return true;
+            else
+                return false;
+        }
 
 
 

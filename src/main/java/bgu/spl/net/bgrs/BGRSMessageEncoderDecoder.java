@@ -36,7 +36,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
         if(endMessageZeroBytes == 2 && nextByte == '\0'){
             if(secondZeroByte) { //if secondZeroByte=false its mean its the first time we encounter a zero byte so in the next zerobyte encounter we want to popString the message.
-                password = new String(bytes, beginPointerForPassword, len, StandardCharsets.UTF_8);
+                password = new String(bytes, beginPointerForPassword, len, StandardCharsets.US_ASCII);
                 if(opcode==1) //If its ADMINREG Message
                     messageFromClient = new ADMINREG(userName,password);
                 else if(opcode==2)
@@ -45,7 +45,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                     messageFromClient = new LOGIN(userName,password);
                 return popMessage();
             }
-            userName = new String(bytes, 2 , len, StandardCharsets.UTF_8);
+            userName = new String(bytes, 2 , len, StandardCharsets.US_ASCII);
             secondZeroByte = true;
             beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }

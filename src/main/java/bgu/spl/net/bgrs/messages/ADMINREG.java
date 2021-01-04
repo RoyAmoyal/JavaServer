@@ -1,5 +1,6 @@
 package bgu.spl.net.bgrs.messages;
 
+import bgu.spl.net.bgrs.BGRSMessageProtocol;
 import bgu.spl.net.bgrs.Database;
 
 public class ADMINREG extends Message {
@@ -23,11 +24,11 @@ public class ADMINREG extends Message {
 
 
     @Override
-    public Message process()  {
+    public Message process(BGRSMessageProtocol myClient)  {
         Database dataBase = Database.getInstance();
-        if(!dataBase.addNewAdmin(myUserName,myPassword))
+        if(dataBase.isClientLoggedIn(myClient) || !dataBase.addNewAdmin(myUserName,myPassword)) // if the client is already logged in he cant register. if addNewAdmin returns false the user already exist
             return new ERROR(myOpCode);
         else
-            return new ACK(myOpCode,myUserName + " registered successfully as a new admin");
+            return new ACK(myOpCode,myUserName + " registered successfully as a new Admin");
     }
 }

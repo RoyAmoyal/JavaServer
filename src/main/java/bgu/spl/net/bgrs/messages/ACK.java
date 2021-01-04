@@ -1,5 +1,7 @@
 package bgu.spl.net.bgrs.messages;
 
+import bgu.spl.net.bgrs.BGRSMessageProtocol;
+
 public class ACK extends Message {
     private final short myReturnedMessageOpcode;
     private final String myMessageReply;
@@ -19,7 +21,7 @@ public class ACK extends Message {
     }
 
     @Override
-    public Message process() {
+    public Message process(BGRSMessageProtocol myCilent) {
         return null;
     }
 }
