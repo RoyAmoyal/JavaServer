@@ -6,10 +6,10 @@ public class ACK extends Message {
     private final short myReturnedMessageOpcode;
     private final String myMessageReply;
 
-    public ACK(short messageSentOpcode,String messageReply) {
+    public ACK(short messageSentOpcode,String stringMessageReply) {
         super.myOpCode = 12;
         myReturnedMessageOpcode = messageSentOpcode;
-        myMessageReply = messageReply;
+        myMessageReply = stringMessageReply;
     }
 
     public short getMyReturnedMessageOpcode() {

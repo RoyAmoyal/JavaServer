@@ -9,8 +9,7 @@ import com.google.gson.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -22,6 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
      * <p>
      * You can add private fields and methods to this class as you see fit.
      */
+
     public class Database {
         private final ConcurrentHashMap<Short,Course> coursesList = new ConcurrentHashMap<>();
         private final ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
@@ -29,8 +29,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         private final Object registerLock = new Object();
         private final Object logInOutLock = new Object();
 
-        /*admin3.getclass();
-        MAYBE WE NEED TO ADD A LIST OF LOGGED IN BECAUSE IF 2 CLIENTS ARE TRYING TO LOG0
+
+        /*  admin3.getclass();
+            MAYBE WE NEED TO ADD A LIST OF LOGGED IN BECAUSE IF 2 CLIENTS ARE TRYING TO LOG0
          */
 
 
@@ -61,11 +62,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         try {
             File myFile = new File(coursesFilePath);
             Scanner myReader = new Scanner(myFile);
-            int indexRow = 1;
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                loadNewCourse(indexRow, data);
-                indexRow++;
+                loadNewCourse(data);
             }
         }catch(FileNotFoundException e){
                 e.printStackTrace();
@@ -73,13 +72,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         return true;
         }
 
-        private void loadNewCourse(int index, String data){
+        private void loadNewCourse(String data){
             String[] fullCourseData = data.split("|");
             short courseNum = Short.parseShort(fullCourseData[0]);
             String courseName = fullCourseData[1];
-
-          //  while()
-         //   coursesList.add(new Course(),);
+            String[] kdamCoursesString = fullCourseData[2].substring(1, fullCourseData[2].length()-1).split(","); //ignore the [ ] of the string with substring.
+            ArrayList<Short> kdamCourseLists = new ArrayList<>();
+            for(int i=0; i<kdamCoursesString.length; i++)
+                kdamCourseLists.add(Short.parseShort(kdamCoursesString[i]));
+            int numOfMaxStudents = Integer.parseInt(fullCourseData[3]);
+            coursesList.put(courseNum,new Course(courseNum,courseName,kdamCourseLists,numOfMaxStudents));
         }
 
 
@@ -157,10 +159,39 @@ import java.util.concurrent.ConcurrentLinkedQueue;
          }
 
         public boolean isCourseExist(short courseNum){
-            if(coursesList.contains(courseNum))
+            if(coursesList.containsKey(courseNum))
                 return true;
             else
                 return false;
+        }
+
+        public boolean isAdmin(BGRSMessageProtocol client){
+            String currUserName = clientsLoggedIn.get(client);
+            User currUser = usersList.get(currUserName);
+            return (currUser.getClass()).equals(Admin.class);
+        }
+
+        public boolean registerToNewCourse(short courseNum,BGRSMessageProtocol client){ // the method isAdmin should be called before this method to check if the client is a student.
+            if(!isCourseExist(courseNum) || isAdmin(client) || !clientsLoggedIn.containsKey(client)) // return false if The course doesn't exist/the client isn't a student/the client isn't logged it
+                return false;
+            Course currCourse = coursesList.get(courseNum);
+            ArrayList<Short> currKdamCoursesRequired = currCourse.getMyKdamCoursesList();
+            String currStudentName = clientsLoggedIn.get(client);
+            Student currStudent = (Student)usersList.get(currStudentName);
+            ConcurrentLinkedQueue<Short> currStudentRegisteredCourses = currStudent.getMyRegisteredCourses();
+            if(currStudentRegisteredCourses.contains(courseNum)) //if the student is already registered to that course.
+                return false;
+            for (Short shortItem : currKdamCoursesRequired) {
+                if (!currStudentRegisteredCourses.contains(shortItem))
+                    return false; //if one of the required kdam courses of that course is missing in the student's registered courses.
+            }
+            //if the student got all the kdam courses required for that course then he can register
+            currStudent.registerToNewCourse(courseNum);
+            return true;
+        }
+
+        public ArrayList<Short> getKdamCourses(short courseNum){ //This method should be called only after isCourseExist(short courseNum).
+            return coursesList.get(courseNum).getMyKdamCoursesList();
         }
 
 

@@ -18,8 +18,10 @@ public class COURSEREG extends Message{
     @Override
     public Message process(BGRSMessageProtocol myClient) {
         Database database = Database.getInstance();
-        if(!database.isClientLoggedIn(myClient) || !database.isCourseExist(myCourseNumber) || )
+        if(!database.registerToNewCourse(myCourseNumber,myClient)) //if the client failed to register to the course
             return new ERROR(myOpCode);
+        else
+            return new ACK(myOpCode,"Successfully registered to the course " + myCourseNumber);
 
     }
 }

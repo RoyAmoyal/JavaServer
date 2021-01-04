@@ -1,5 +1,6 @@
 package bgu.spl.net.bgrs.messages;
 
+import bgu.spl.net.bgrs.BGRSMessageProtocol;
 import bgu.spl.net.bgrs.Database;
 
 public class STUDENTREG extends Message{
@@ -22,7 +23,7 @@ public class STUDENTREG extends Message{
     }
 
     @Override
-    public Message process() {
+    public Message process(BGRSMessageProtocol myClient) {
         Database dataBase = Database.getInstance();
         if(!dataBase.addNewAdmin(myUserName,myPassword))
             return new ERROR(myOpCode);

@@ -1,15 +1,17 @@
 package bgu.spl.net.bgrs.users;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Course {
     private final short myCourseNum;
     private final String myCourseName;
-    private final ConcurrentLinkedQueue<Short> myKdamCoursesList;
+    private final ArrayList<Short> myKdamCoursesList;
     private final int myNumOfMaxStudents; // int >= 5
     private ConcurrentLinkedQueue<User> myRegisteredStudents;
 
-    public Course(short courseNum,String courseName, ConcurrentLinkedQueue<Short> kdamCoursesList, int numOfMaxStudents){
+    public Course(short courseNum, String courseName, ArrayList<Short> kdamCoursesList, int numOfMaxStudents){
         myCourseNum = courseNum;
         myCourseName = courseName;
         myKdamCoursesList = kdamCoursesList;
@@ -25,7 +27,7 @@ public class Course {
         return myCourseName;
     }
 
-    public ConcurrentLinkedQueue<Short> getMyKdamCoursesList() {
+    public ArrayList<Short> getMyKdamCoursesList() {
         return myKdamCoursesList;
     }
 
