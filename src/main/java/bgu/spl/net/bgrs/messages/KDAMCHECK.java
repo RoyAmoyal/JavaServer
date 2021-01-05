@@ -26,7 +26,7 @@ public class KDAMCHECK extends Message{
         if(!dataBase.isCourseExist(myCourseNumber) || !dataBase.isClientLoggedIn(myClient) || dataBase.isAdmin(myClient))
             //if the client isn't logged in or he is an admin or the course doesn't exist in the system return error
             return new ERROR(myOpCode);
-        ArrayList<Short> tempKdamCourses = dataBase.getKdamCourses(myCourseNumber); //WE HAVE TO CHECK IF ITS A NEW OBJECT OR WE DAMAGE THE ORIGINAL LIST
+        ArrayList<Short> tempKdamCourses = dataBase.getKdamCourses(myCourseNumber); //Kdam check doesn't change so we can do it here.
         String kdamCheckString = kdamCheckCoursesToString(tempKdamCourses);
         return new ACK(myOpCode,kdamCheckString); //returns the list of the kdamCourses of myCourseNumber. Example: "[43,124,457]"
     }

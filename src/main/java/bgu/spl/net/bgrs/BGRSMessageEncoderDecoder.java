@@ -30,7 +30,8 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
         //End message per case without including the zero byte that indicates about the end of the message
         if (nextByte == '\0' && endMessageZeroBytes == 1) { //opcode must be 8 here.
-            messageFromClient = new STUDENTSTAT();
+            userName = new String(bytes, 2 , len, StandardCharsets.US_ASCII);
+            messageFromClient = new STUDENTSTAT(userName);
             return popMessage();
         }
 

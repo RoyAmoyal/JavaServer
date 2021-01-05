@@ -4,19 +4,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class Course {
+public class Course implements Comparable<Course>{
     private final short myCourseNum;
     private final String myCourseName;
     private final ArrayList<Short> myKdamCoursesList;
     private final int myNumOfMaxStudents; // int >= 5
-    private ConcurrentLinkedQueue<User> myRegisteredStudents;
+    private final ArrayList<User> myRegisteredStudents; // WE HAVE TO SYNCHRONIZE THE DATA BASE METHODS THAT USE THAT FIELD!!!!
+    private final int myRowInCoursesFile;
 
-    public Course(short courseNum, String courseName, ArrayList<Short> kdamCoursesList, int numOfMaxStudents){
+
+
+
+    public Course(short courseNum, String courseName, ArrayList<Short> kdamCoursesList, int numOfMaxStudents, int rowIndex){
         myCourseNum = courseNum;
         myCourseName = courseName;
         myKdamCoursesList = kdamCoursesList;
         myNumOfMaxStudents = numOfMaxStudents;
-        myRegisteredStudents = new ConcurrentLinkedQueue<>();
+        myRegisteredStudents = new ArrayList<>();
+        myRowInCoursesFile = rowIndex;
     }
 
     public short getMyCourseNum() {
@@ -39,11 +44,25 @@ public class Course {
         return myNumOfMaxStudents-myRegisteredStudents.size();
     };
 
-    public boolean registerToMyCourse(User e){
+    public boolean registerToMyCourse(User e){ //the database check before if that user is already registered to the course so we don't have to worry about it.
         if(myRegisteredStudents.size()<=myNumOfMaxStudents){
             myRegisteredStudents.add(e);
             return true;
         }
         return false;
+    }
+
+    public ArrayList<User> getMyRegisteredStudents(){
+        return myRegisteredStudents;
+    }
+
+
+    public int getMyRowInCoursesFile() {
+        return myRowInCoursesFile;
+    }
+
+    @Override
+    public int compareTo(Course otherCourse) {
+        return this.myRowInCoursesFile - otherCourse.myRowInCoursesFile;
     }
 }
