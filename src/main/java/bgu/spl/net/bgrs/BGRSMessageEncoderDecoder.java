@@ -92,7 +92,40 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     @Override
     public byte[] encode(Message message) {
-        return (message + "\n").getBytes(); //uses utf8 by default
+        if(message.getClass().equals(ERROR.class)){
+            ERROR currError = (ERROR)message;
+            short opCodeMessageReply = currError.getMyReturnedMessageOpcode();
+            short errorOpCode = currError.getOpCode();
+            byte[] opCodeMessageReplyBytes = shortToBytes(opCodeMessageReply);
+            byte[] errorOpCodeBytes = shortToBytes(errorOpCode);
+            byte[] finalErrorMessageBytes = new byte[opCodeMessageReplyBytes.length+errorOpCodeBytes.length];
+            System.arraycopy(opCodeMessageReplyBytes,0,finalErrorMessageBytes,0,opCodeMessageReplyBytes.length);
+            System.arraycopy(errorOpCodeBytes,0,finalErrorMessageBytes,opCodeMessageReplyBytes.length,errorOpCodeBytes.length);
+            return finalErrorMessageBytes; //
+        }
+        //if its not an error message then its ack --->
+        ACK currACK = (ACK)message;
+        short opCodeMessageReply = currACK.getMyReturnedMessageOpcode();
+        short ackOpCode = currACK.getOpCode();
+        byte[] opCodeMessageReplyBytes = shortToBytes(opCodeMessageReply);
+        byte[] ackOpCodeBytes = shortToBytes(ackOpCode);
+        byte[] ackShortsMessageBytes = new byte[opCodeMessageReplyBytes.length + ackOpCodeBytes.length];
+        System.arraycopy(opCodeMessageReplyBytes,0,ackShortsMessageBytes,0,opCodeMessageReplyBytes.length);
+        System.arraycopy(ackOpCodeBytes,0,ackShortsMessageBytes,opCodeMessageReplyBytes.length,ackOpCodeBytes.length);
+        // we got the 4 bytes of the shorts ready.
+        if(currACK.getMyStringReply().equals("")){ //if the string is empty
+            byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + 1]; // plus one for the zeroByte
+            System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,ackShortsMessageBytes.length); // we got the shorts in the array
+            finalACKMessageBytes[5] = '\0';
+            return finalACKMessageBytes;
+        }
+        String strReply = currACK.getMyStringReply();
+        byte[] strBytes = strReply.getBytes(StandardCharsets.US_ASCII);
+        byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + strBytes.length + 1]; // plus one for the zeroByte
+        System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,finalACKMessageBytes.length); //now we got shorts in the array
+        System.arraycopy(strBytes,0,finalACKMessageBytes,finalACKMessageBytes.length,strBytes.length); //now we got shorts + String in the array
+        finalACKMessageBytes[finalACKMessageBytes.length-1] = '\0'; //now the Final ACK MESSAGE bytes are ready.
+        return finalACKMessageBytes;
     }
 
     private void pushByte(byte nextByte) {

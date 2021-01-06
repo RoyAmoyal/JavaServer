@@ -1,17 +1,24 @@
 package bgu.spl.net.bgrs.messages;
 
+import bgu.spl.net.bgrs.BGRSMessageProtocol;
 import bgu.spl.net.bgrs.Database;
 
 public class ERROR extends Message{
-    private final short returnedMessageOpcode;
+    private final short myReturnedMessageOpcode;
 
     public ERROR(short messageSentOpcode) {
         super.myOpCode = 13;
-        returnedMessageOpcode = messageSentOpcode;
+        myReturnedMessageOpcode = messageSentOpcode;
     }
 
-    @Override
-    public <T extends Message> T process() {
 
+
+    @Override
+    public Message process(BGRSMessageProtocol myClient) {
+        return null;
+    }
+
+    public short getMyReturnedMessageOpcode() {
+        return myReturnedMessageOpcode;
     }
 }

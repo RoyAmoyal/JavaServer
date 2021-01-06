@@ -17,7 +17,7 @@ public class STUDENTSTAT extends Message{
             //if the client isn't logged in or he *isn't a admin* or the requested User doesn't exist on the system or the requested user is not an student (means he is a admin).
             return new ERROR(myOpCode);
         else
-            return new ACK(myOpCode, dataBase.getCourseStatString(myCourseNumber));
+            return new ACK(myOpCode, dataBase.getStudentStatString(myRequestedStatsUserName));
 
     }
 }

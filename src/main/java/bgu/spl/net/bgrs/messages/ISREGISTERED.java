@@ -1,22 +1,32 @@
 package bgu.spl.net.bgrs.messages;
 
-public class ISREGISTERED extends Message{
-    private final int myCourseNumber;
+import bgu.spl.net.bgrs.BGRSMessageProtocol;
+import bgu.spl.net.bgrs.Database;
 
-    public ISREGISTERED(int courseNumber) {
+public class ISREGISTERED extends Message{
+    private final short myCourseNumber;
+
+    public ISREGISTERED(short courseNumber) {
       super.myOpCode = 9;
       myCourseNumber = courseNumber;
     }
 
 
 
-    public int getMyCourseNumber() {
+    public short getMyCourseNumber() {
         return myCourseNumber;
     }
 
     @Override
-    public <T extends Message> T process() {
-        return null;
-    }
+    public Message process(BGRSMessageProtocol myClient) {
+        Database dataBase = Database.getInstance();
+        if(!dataBase.isClientLoggedIn(myClient) || dataBase.isAdmin(myClient)) //if the client isn't logged in as a user or he is an admin return error.
+            return new ERROR(myOpCode);
+        if(dataBase.isRegisteredToCourse(myClient,myCourseNumber))
+            return new ACK(myOpCode,"REGISTERED");
+        else
+            return new ACK(myOpCode,"NOT REGISTERED");
 
+
+    }
 }

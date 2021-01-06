@@ -30,12 +30,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
         private final Object logInOutLock = new Object();
 
 
-        /*  admin3.getclass();
-            MAYBE WE NEED TO ADD A LIST OF LOGGED IN BECAUSE IF 2 CLIENTS ARE TRYING TO LOG0
-         */
-    class RowCompare implements Comparator<Course>{
-
-        }
 
     //to prevent user from creating new Database
     private Database(){
@@ -70,6 +64,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
                 rowIndex++;
                 loadNewCourse(data,rowIndex);
             }
+            for(Map.Entry<Short,Course> item: coursesList.entrySet()){ //Sort all the kdamcourses shorts of each course to the order that the courses appear in the Courses.text file
+                ArrayList<Short> currKdamCourses = item.getValue().getMyKdamCoursesList();
+                Collections.sort(item.getValue().getMyKdamCoursesList(), new Comparator<Short>() { //Anonymous Class can be replaced with lambda that can be replaced to even shorter call.
+                    @Override
+                    public int compare(Short o1, Short o2) {
+                        return coursesList.get(o1).getMyRowInCoursesFile()-coursesList.get(o2).getMyRowInCoursesFile();
+                    }
+                });
+                }
+
         }catch(FileNotFoundException e){
                 e.printStackTrace();
             }
@@ -86,10 +90,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
             for(int i=0; i<kdamCoursesString.length; i++)
                 kdamCourseLists.add(Short.parseShort(kdamCoursesString[i]));
             int numOfMaxStudents = Integer.parseInt(fullCourseData[3]);
-            coursesList.put(courseNum,new Course(courseNum,courseName,kdamCourseLists,numOfMaxStudents,rowIndex));
+            Course currNewCourse = new Course(courseNum,courseName,kdamCourseLists,numOfMaxStudents,rowIndex);
+            coursesList.put(courseNum,currNewCourse);
         }
 
-        private int
 
 
     //synchronized?
@@ -187,7 +191,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
             ArrayList<Short> currKdamCoursesRequired = currCourse.getMyKdamCoursesList();
             String currStudentName = clientsLoggedIn.get(client);
             Student currStudent = (Student)usersList.get(currStudentName);
-            ConcurrentLinkedQueue<Short> currStudentRegisteredCourses = currStudent.getMyRegisteredCourses();
+            ArrayList<Short> currStudentRegisteredCourses = currStudent.getMyRegisteredCourses();
             if(currStudentRegisteredCourses.contains(courseNum)) //if the student is already registered to that course.
                 return false;
             for (Short shortItem : currKdamCoursesRequired) {
@@ -207,7 +211,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
      }
 
     public ArrayList<Short> getKdamCourses(short courseNum){ //This method should be called only after isCourseExist(short courseNum).
-            return coursesList.get(courseNum).getMyKdamCoursesList();
+            return coursesList.get(courseNum).getMyKdamCoursesList(); // we already sorted the kdamCourses list of each course to the order of the file.
         }
 
         public int getSeatsAvailable(short courseNum){
@@ -236,14 +240,51 @@ import java.util.concurrent.ConcurrentLinkedQueue;
     public synchronized String getStudentStatString(String userName){
         Student currStudent = (Student)usersList.get(userName); //we assume we check before calling this method if that userName is a student on the system.
         ArrayList<Short> currRegisteredCourses = currStudent.getMyRegisteredCourses();
+        Collections.sort(currRegisteredCourses, new Comparator<Short>() { //sort
+            @Override
+            public int compare(Short o1, Short o2) {
+                return coursesList.get(o1).getMyRowInCoursesFile()-coursesList.get(o2).getMyRowInCoursesFile();
+            }
+        });
         String[] currRegisteredStrArray = new String[currRegisteredCourses.size()];
         for(int i = 0; i< currRegisteredStrArray.length;i++)
             currRegisteredStrArray[i] = String.valueOf(currRegisteredCourses.get(i));
         if(currRegisteredStrArray.length==0)
             return "[]";
-        // ---------- WE HAVE TO SORT ----------
-
+        String fullStrCourses = "[" + String.join(",",currRegisteredStrArray) + "]";
+        return "Student: " + userName + "\n Courses: " + fullStrCourses;
     }
+
+    public boolean isRegisteredToCourse(BGRSMessageProtocol client,short courseNum){
+        String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+        ArrayList<Short> currRegisteredCourses = ((Student)usersList.get(clientUserName)).getMyRegisteredCourses();
+        return currRegisteredCourses.contains(courseNum);
+    }
+
+    public boolean unRegisterToCourse(BGRSMessageProtocol client,short courseNum){
+        if(!isRegisteredToCourse(client,courseNum)) //if the user is unregistered to that course he cant unRegister again so return false
+            return false;
+        String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+        ((Student)usersList.get(clientUserName)).unRegisterToCourse(courseNum);
+        return true;
+    }
+
+    public String getMyCoursesStr(BGRSMessageProtocol client){
+        String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+        ArrayList<Short> currRegisteredCourses = ((Student)usersList.get(clientUserName)).getMyRegisteredCourses();
+        Collections.sort(currRegisteredCourses, new Comparator<Short>() { //sort
+            @Override
+            public int compare(Short o1, Short o2) {
+                return coursesList.get(o1).getMyRowInCoursesFile()-coursesList.get(o2).getMyRowInCoursesFile();
+            }
+        });
+        String[] registeredCoursesStr = new String[currRegisteredCourses.size()];
+        for(int i=0;i< registeredCoursesStr.length;i++){
+            registeredCoursesStr[i] = String.valueOf(currRegisteredCourses.get(i));  //not have to be sorted
+        }
+        return "[" + String.join(",",registeredCoursesStr) + "]";
+    }
+
 
         }
 

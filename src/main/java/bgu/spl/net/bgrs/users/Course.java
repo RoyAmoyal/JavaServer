@@ -1,10 +1,12 @@
 package bgu.spl.net.bgrs.users;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class Course implements Comparable<Course>{
+public class Course {
     private final short myCourseNum;
     private final String myCourseName;
     private final ArrayList<Short> myKdamCoursesList;
@@ -22,7 +24,8 @@ public class Course implements Comparable<Course>{
         myNumOfMaxStudents = numOfMaxStudents;
         myRegisteredStudents = new ArrayList<>();
         myRowInCoursesFile = rowIndex;
-    }
+        };
+
 
     public short getMyCourseNum() {
         return myCourseNum;
@@ -61,8 +64,5 @@ public class Course implements Comparable<Course>{
         return myRowInCoursesFile;
     }
 
-    @Override
-    public int compareTo(Course otherCourse) {
-        return this.myRowInCoursesFile - otherCourse.myRowInCoursesFile;
-    }
+
 }
