@@ -1,6 +1,6 @@
-package bgu.spl.net.bgrs.messages;
+package bgu.spl.net.impl.BGRSServer.messages;
 
-import bgu.spl.net.bgrs.BGRSMessageProtocol;
+import bgu.spl.net.impl.BGRSServer.BGRSMessageProtocol;
 
 public class ACK extends Message{
     private final short myReturnedMessageOpcode;

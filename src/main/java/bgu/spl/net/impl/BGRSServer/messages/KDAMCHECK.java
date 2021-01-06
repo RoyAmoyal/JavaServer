@@ -1,11 +1,9 @@
-package bgu.spl.net.bgrs.messages;
+package bgu.spl.net.impl.BGRSServer.messages;
 
-import bgu.spl.net.bgrs.BGRSMessageProtocol;
-import bgu.spl.net.bgrs.Database;
+import bgu.spl.net.impl.BGRSServer.BGRSMessageProtocol;
+import bgu.spl.net.impl.BGRSServer.Database;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class KDAMCHECK extends Message{
     private final short myCourseNumber;

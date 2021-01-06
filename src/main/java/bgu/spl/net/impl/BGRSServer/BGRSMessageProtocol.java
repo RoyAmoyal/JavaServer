@@ -1,9 +1,7 @@
-package bgu.spl.net.bgrs;
+package bgu.spl.net.impl.BGRSServer;
 import bgu.spl.net.api.*;
-import bgu.spl.net.bgrs.*;
-import bgu.spl.net.bgrs.messages.ADMINREG;
-import bgu.spl.net.bgrs.messages.*;
-import bgu.spl.net.bgrs.users.*;
+import bgu.spl.net.impl.BGRSServer.messages.*;
+import bgu.spl.net.impl.BGRSServer.messages.Message;
 
 public class BGRSMessageProtocol implements MessagingProtocol<Message> {
     private String MyUser=null;
@@ -15,6 +13,8 @@ public class BGRSMessageProtocol implements MessagingProtocol<Message> {
     @Override
     public Message process(Message msg) {
         Message returnedMessage = msg.process(this);
+        if(returnedMessage.equals(LOGOUT.class))
+            shouldTerminate=true;
         return returnedMessage; // we need to change the conditions here
         //if(returnedMessage.equals(ACK.class))
             //....

@@ -1,7 +1,6 @@
-package bgu.spl.net.bgrs.users;
+package bgu.spl.net.impl.BGRSServer.users;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Student extends User{
     private ArrayList<Short> myRegisteredCourses;

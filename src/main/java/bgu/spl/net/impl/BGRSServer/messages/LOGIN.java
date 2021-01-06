@@ -1,7 +1,7 @@
-package bgu.spl.net.bgrs.messages;
+package bgu.spl.net.impl.BGRSServer.messages;
 
-import bgu.spl.net.bgrs.BGRSMessageProtocol;
-import bgu.spl.net.bgrs.Database;
+import bgu.spl.net.impl.BGRSServer.BGRSMessageProtocol;
+import bgu.spl.net.impl.BGRSServer.Database;
 
 public class LOGIN extends Message{
     private final String myUserName;

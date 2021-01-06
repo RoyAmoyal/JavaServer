@@ -1,4 +1,4 @@
-package bgu.spl.net.bgrs.users;
+package bgu.spl.net.impl.BGRSServer.users;
 
 public abstract class User {
     private String userName;

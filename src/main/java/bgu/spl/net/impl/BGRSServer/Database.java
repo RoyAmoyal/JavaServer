@@ -1,17 +1,15 @@
-package bgu.spl.net.bgrs;
+package bgu.spl.net.impl.BGRSServer;
 
 
-import bgu.spl.net.bgrs.users.Course;
-import bgu.spl.net.bgrs.users.User;
-import bgu.spl.net.bgrs.users.Admin;
-import bgu.spl.net.bgrs.users.Student;
-import com.google.gson.*;
+import bgu.spl.net.impl.BGRSServer.users.Course;
+import bgu.spl.net.impl.BGRSServer.users.User;
+import bgu.spl.net.impl.BGRSServer.users.Admin;
+import bgu.spl.net.impl.BGRSServer.users.Student;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
      * Passive object representing the Database where all courses and users are stored.
@@ -24,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
     public class Database {
         private final ConcurrentHashMap<Short,Course> coursesList = new ConcurrentHashMap<>();
-        private final ConcurrentHashMap<String,User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
+        private final ConcurrentHashMap<String, User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
         private final ConcurrentHashMap<BGRSMessageProtocol,String> clientsLoggedIn = new ConcurrentHashMap<>();
         private final Object registerLock = new Object();
         private final Object logInOutLock = new Object();

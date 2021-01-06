@@ -1,10 +1,6 @@
-package bgu.spl.net.bgrs.users;
+package bgu.spl.net.impl.BGRSServer.users;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class Course {
     private final short myCourseNum;

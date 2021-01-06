@@ -1,10 +1,9 @@
-package bgu.spl.net.bgrs;
+package bgu.spl.net.impl.BGRSServer;
 import bgu.spl.net.api.*;
-import bgu.spl.net.bgrs.messages.*;
+import bgu.spl.net.impl.BGRSServer.messages.*;
+import bgu.spl.net.impl.BGRSServer.messages.*;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>{
