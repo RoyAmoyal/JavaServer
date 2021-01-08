@@ -39,7 +39,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                 password = new String(bytes, beginPointerForPassword, len, StandardCharsets.US_ASCII);
                 if(opcode==1) { //If its ADMINREG Message
                     messageFromClient = new ADMINREG(userName, password);
-                    System.out.println("ADMINREG RECIVED: Username: " + userName + " Passowrd: " + password);
+                    System.out.println("testing: ADMINREG RECIVED: Username: " + userName + " Passowrd: " + password);
                 }
                 else if(opcode==2)
                     messageFromClient = new STUDENTREG(userName,password);
@@ -51,12 +51,13 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             secondZeroByte = true;
             beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }
-
+        System.out.println("testing: Pushing byte num: " + len);
         pushByte(nextByte);
 
         //End Message: for the cases we don't have a terminate byte.
         if(len==2) { //we finished to read the opcode on the previous byte
             opcode = opcodeDecoder();
+            System.out.println("test: opcode recived is: " + opcode);
             setEndMessageZeroBytesByOpcode(opcode);
             if(endMessageZeroBytes==-1) // if the message doesn't contain '\0' for end message and it contains only the opcode.
                 if(opcode==4)
