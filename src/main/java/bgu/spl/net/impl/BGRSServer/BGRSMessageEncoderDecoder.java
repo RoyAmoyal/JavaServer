@@ -51,7 +51,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             secondZeroByte = true;
             beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }
-        System.out.println("testing: Pushing byte num: " + len);
+        System.out.println("testing: Pushing byte num: " + len+1);
         pushByte(nextByte);
 
         //End Message: for the cases we don't have a terminate byte.
@@ -59,12 +59,13 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             opcode = opcodeDecoder();
             System.out.println("test: opcode recived is: " + opcode);
             setEndMessageZeroBytesByOpcode(opcode);
-            if(endMessageZeroBytes==-1) // if the message doesn't contain '\0' for end message and it contains only the opcode.
-                if(opcode==4)
+            if(endMessageZeroBytes==-1) { // if the message doesn't contain '\0' for end message and it contains only the opcode.
+                if (opcode == 4)
                     messageFromClient = new LOGOUT();
                 else
                     messageFromClient = new MYCOURSES();
                 return popMessage();
+            }
         }
 
         if(len==4 && endMessageZeroBytes==0){
@@ -149,8 +150,10 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
     //The 2 bytes of the opcode are encoding to string
     private short opcodeDecoder(){
-
-        return opcode;
+        byte[] opcodeBytes = new byte[2];
+        opcodeBytes[0] = bytes[0];
+        opcodeBytes[1] = bytes[1];
+        return bytesToShort(opcodeBytes);
     }
 
     //This method defines how much zero bytes we should expect for that message to identify the end of the message.

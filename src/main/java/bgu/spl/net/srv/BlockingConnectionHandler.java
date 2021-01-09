@@ -31,7 +31,6 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
         this.protocol = protocol;
     }
 
-
     @Override
     public void run() {
         try (Socket sock = this.sock) { //just for automatic closing
@@ -43,6 +42,7 @@ public class BlockingConnectionHandler<T> implements Runnable, ConnectionHandler
             while (!protocol.shouldTerminate() && connected && (read = in.read()) >= 0) {
                 T nextMessage = encdec.decodeNextByte((byte) read);
                 if (nextMessage != null) {
+                    System.out.println("Recived message waiting for respond");
                     T response = protocol.process(nextMessage);
                     if (response != null) {
                         out.write(encdec.encode(response));
