@@ -25,7 +25,7 @@ public class STUDENTREG extends Message{
     @Override
     public Message process(BGRSMessageProtocol myClient) {
         Database dataBase = Database.getInstance();
-        if(!dataBase.addNewAdmin(myUserName,myPassword))
+        if(dataBase.isClientLoggedIn(myClient) || !dataBase.addNewStudent(myUserName,myPassword)) // if the client is already logged in he cant register. if addNewAdmin returns false the user already exist
             return new ERROR(myOpCode);
         else
             return new ACK(myOpCode,"");

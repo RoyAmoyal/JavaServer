@@ -24,7 +24,7 @@ public class LOGIN extends Message{
     @Override
     public Message process(BGRSMessageProtocol myClient) {
         Database dataBase = Database.getInstance();
-        if (dataBase.isClientLoggedIn(myClient) || dataBase.isUserLoggedIn(myUserName)) { //if the client is already logged in or someone is already logged in with that user.
+        if (!dataBase.isUserExist(myUserName) || dataBase.isClientLoggedIn(myClient) || dataBase.isUserLoggedIn(myUserName)) { //if the client is already logged in or someone is already logged in with that user.
             return new ERROR(myOpCode);
         }
         if (dataBase.loginToTheSystem(myUserName, myPassword, myClient)) { //The condition will fail if the username or the password are incorrect.

@@ -80,15 +80,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
         private void loadNewCourse(String data,int rowIndex){
-            String[] fullCourseData = data.split("|");
+            String[] fullCourseData = data.split("\\|");
             short courseNum = Short.parseShort(fullCourseData[0]);
             String courseName = fullCourseData[1];
-            String[] kdamCoursesString = fullCourseData[2].substring(1, fullCourseData[2].length()-1).split(","); //ignore the [ ] of the string with substring.
-            ArrayList<Short> kdamCourseLists = new ArrayList<>();
-            for(int i=0; i<kdamCoursesString.length; i++)
-                kdamCourseLists.add(Short.parseShort(kdamCoursesString[i]));
-            int numOfMaxStudents = Integer.parseInt(fullCourseData[3]);
-            Course currNewCourse = new Course(courseNum,courseName,kdamCourseLists,numOfMaxStudents,rowIndex);
+            Course currNewCourse;
+            if(fullCourseData[2].equals("[]")) {
+                int numOfMaxStudents = Integer.parseInt(fullCourseData[3]);
+                currNewCourse = new Course(courseNum, courseName, new ArrayList<Short>(), numOfMaxStudents, rowIndex);
+            }
+            else {
+                String[] kdamCoursesString = fullCourseData[2].substring(1, fullCourseData[2].length() - 1).split(","); //ignore the [ ] of the string with substring.
+                ArrayList<Short> kdamCourseLists = new ArrayList<>();
+                for (int i = 0; i < kdamCoursesString.length; i++)
+                    kdamCourseLists.add(Short.parseShort(kdamCoursesString[i]));
+                int numOfMaxStudents = Integer.parseInt(fullCourseData[3]);
+                currNewCourse = new Course(courseNum, courseName, kdamCourseLists, numOfMaxStudents, rowIndex);
+            }
             coursesList.put(courseNum,currNewCourse);
         }
 

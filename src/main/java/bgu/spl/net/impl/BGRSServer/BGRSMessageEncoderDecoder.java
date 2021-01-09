@@ -47,7 +47,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                     messageFromClient = new LOGIN(userName,password);
                 return popMessage();
             }
-            userName = new String(bytes, 2 , len, StandardCharsets.US_ASCII);
+            userName = new String(bytes, 2 , len-1, StandardCharsets.US_ASCII);
             secondZeroByte = true;
             beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }
@@ -102,8 +102,8 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             byte[] opCodeMessageReplyBytes = shortToBytes(opCodeMessageReply);
             byte[] errorOpCodeBytes = shortToBytes(errorOpCode);
             byte[] finalErrorMessageBytes = new byte[opCodeMessageReplyBytes.length+errorOpCodeBytes.length];
-            System.arraycopy(opCodeMessageReplyBytes,0,finalErrorMessageBytes,0,opCodeMessageReplyBytes.length);
-            System.arraycopy(errorOpCodeBytes,0,finalErrorMessageBytes,opCodeMessageReplyBytes.length,errorOpCodeBytes.length);
+            System.arraycopy(errorOpCodeBytes,0,finalErrorMessageBytes,0,errorOpCodeBytes.length);
+            System.arraycopy(opCodeMessageReplyBytes,0,finalErrorMessageBytes,errorOpCodeBytes.length,opCodeMessageReplyBytes.length);
             return finalErrorMessageBytes; //
         }
         //if its not an error message then its ack --->
@@ -113,13 +113,13 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
         byte[] opCodeMessageReplyBytes = shortToBytes(opCodeMessageReply);
         byte[] ackOpCodeBytes = shortToBytes(ackOpCode);
         byte[] ackShortsMessageBytes = new byte[opCodeMessageReplyBytes.length + ackOpCodeBytes.length];
-        System.arraycopy(opCodeMessageReplyBytes,0,ackShortsMessageBytes,0,opCodeMessageReplyBytes.length);
-        System.arraycopy(ackOpCodeBytes,0,ackShortsMessageBytes,opCodeMessageReplyBytes.length,ackOpCodeBytes.length);
+        System.arraycopy(ackOpCodeBytes,0,ackShortsMessageBytes,0,ackOpCodeBytes.length);
+        System.arraycopy(opCodeMessageReplyBytes,0,ackShortsMessageBytes,ackOpCodeBytes.length,opCodeMessageReplyBytes.length);
         // we got the 4 bytes of the shorts ready.
         if(currACK.getMyStringReply().equals("")){ //if the string is empty
             byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + 1]; // plus one for the zeroByte
             System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,ackShortsMessageBytes.length); // we got the shorts in the array
-            finalACKMessageBytes[5] = '\0';
+            finalACKMessageBytes[4] = '\0';
             return finalACKMessageBytes;
         }
         //if the string isn't empty.
