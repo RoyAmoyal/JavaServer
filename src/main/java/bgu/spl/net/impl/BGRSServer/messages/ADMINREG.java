@@ -29,6 +29,6 @@ public class ADMINREG extends Message {
         if(dataBase.isClientLoggedIn(myClient) || !dataBase.addNewAdmin(myUserName,myPassword)) // if the client is already logged in he cant register. if addNewAdmin returns false the user already exist
             return new ERROR(myOpCode);
         else
-            return new ACK(myOpCode,myUserName + " registered successfully as a new Admin");
+            return new ACK(myOpCode,"");
     }
 }
