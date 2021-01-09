@@ -21,7 +21,7 @@ public class COURSEREG extends Message{
         if(!database.registerToNewCourse(myCourseNumber,myClient)) //if the client failed to register to the course
             return new ERROR(myOpCode);
         else
-            return new ACK(myOpCode,"Successfully registered to the course " + myCourseNumber);
+            return new ACK(myOpCode,"");
 
     }
 }

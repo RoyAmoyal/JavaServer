@@ -121,6 +121,7 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             finalACKMessageBytes[5] = '\0';
             return finalACKMessageBytes;
         }
+        //if the string isn't empty.
         String strReply = currACK.getMyStringReply();
         byte[] strBytes = strReply.getBytes(StandardCharsets.US_ASCII);
         byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + strBytes.length + 1]; // plus one for the zeroByte

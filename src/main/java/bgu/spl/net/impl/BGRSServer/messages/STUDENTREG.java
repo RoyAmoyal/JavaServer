@@ -28,6 +28,6 @@ public class STUDENTREG extends Message{
         if(!dataBase.addNewAdmin(myUserName,myPassword))
             return new ERROR(myOpCode);
         else
-            return new ACK(myOpCode,myUserName + " registered successfully as a new Student");
+            return new ACK(myOpCode,"");
     }
 }
