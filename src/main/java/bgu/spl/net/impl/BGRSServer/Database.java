@@ -141,7 +141,7 @@ import java.util.concurrent.ConcurrentHashMap;
          public boolean loginToTheSystem(String userName,String password, BGRSMessageProtocol client) { //this method is called by the protocol assuming isLoggedIn return false to the protocol
              synchronized (logInOutLock) { // To prevent 2 clients to login in the same time, or one of them will logout while the other login.
                  //if the user exists in the system and the password is correct
-                 if (isUserExist(userName) && usersList.get(userName).getPassword().equals(password)){
+                 if (isUserExist(userName) && ((usersList.get(userName)).getPassword()).equals(password)){
                      clientsLoggedIn.put(client,userName);
                      usersList.get(userName).logIn();
                      return true;
@@ -204,6 +204,7 @@ import java.util.concurrent.ConcurrentHashMap;
                     return false; //if one of the required kdam courses of that course is missing in the student's registered courses.
             }
             //if the student got all the kdam courses required for that course then he can register
+            currCourse.registerToMyCourse(currStudent);
             currStudent.registerToNewCourse(courseNum);
             return true;
         }
@@ -226,18 +227,21 @@ import java.util.concurrent.ConcurrentHashMap;
         public synchronized String getCourseStatString(short courseNum){ //we have to implement this method here because its thread safe (with synchronized)
             Course currCourse = coursesList.get(courseNum);
           ArrayList<User> currRegisteredStudents = currCourse.getMyRegisteredStudents();
-          String[] currRegisteredStrArray = new String[currRegisteredStudents.size()];
-          for(int i = 0; i< currRegisteredStrArray.length;i++)
-              currRegisteredStrArray[i] = currRegisteredStudents.get(i).getUserName();
-          if(currRegisteredStrArray.length==0)
-              return "[]";
-          Arrays.sort(currRegisteredStrArray); // sort to alphabetical order of names.
-          String fullStrRegistered = "[" + String.join(",",currRegisteredStrArray) + "]";
+          String fullStrRegistered;
+          if(currRegisteredStudents.size()==0)
+              fullStrRegistered = "[]";
+          else {
+              String[] currRegisteredStrArray = new String[currRegisteredStudents.size()];
+              for (int i = 0; i < currRegisteredStrArray.length; i++)
+                  currRegisteredStrArray[i] = currRegisteredStudents.get(i).getUserName();
+              Arrays.sort(currRegisteredStrArray); // sort to alphabetical order of names.
+              fullStrRegistered = "[" + String.join(",", currRegisteredStrArray) + "]";
+          }
           int currFreeSeats = currCourse.getFreeSeatsNum();
           int maxSeats = currCourse.getMyNumOfMaxStudents();
           String fullStrAvailableSeats = String.valueOf(currFreeSeats) + "/" + String.valueOf(maxSeats);
-            return "Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\n Seats Available: " + fullStrAvailableSeats +
-                                      "\n Students Registered: " + fullStrRegistered;
+            return "Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
+                                      "\nStudents Registered: " + fullStrRegistered;
         }
 
     /*COURSE METHODS*/
@@ -245,19 +249,22 @@ import java.util.concurrent.ConcurrentHashMap;
     public synchronized String getStudentStatString(String userName){
         Student currStudent = (Student)usersList.get(userName); //we assume we check before calling this method if that userName is a student on the system.
         ArrayList<Short> currRegisteredCourses = currStudent.getMyRegisteredCourses();
-        Collections.sort(currRegisteredCourses, new Comparator<Short>() { //sort
-            @Override
-            public int compare(Short o1, Short o2) {
-                return coursesList.get(o1).getMyRowInCoursesFile()-coursesList.get(o2).getMyRowInCoursesFile();
-            }
-        });
-        String[] currRegisteredStrArray = new String[currRegisteredCourses.size()];
-        for(int i = 0; i< currRegisteredStrArray.length;i++)
-            currRegisteredStrArray[i] = String.valueOf(currRegisteredCourses.get(i));
-        if(currRegisteredStrArray.length==0)
-            return "[]";
-        String fullStrCourses = "[" + String.join(",",currRegisteredStrArray) + "]";
-        return "Student: " + userName + "\n Courses: " + fullStrCourses;
+        String strRegisteredCourses;
+        if(currRegisteredCourses.size()==0)
+            strRegisteredCourses = "[]";
+        else {
+            Collections.sort(currRegisteredCourses, new Comparator<Short>() { //sort
+                @Override
+                public int compare(Short o1, Short o2) {
+                    return coursesList.get(o1).getMyRowInCoursesFile() - coursesList.get(o2).getMyRowInCoursesFile();
+                }
+            });
+            String[] currRegisteredStrArray = new String[currRegisteredCourses.size()];
+            for (int i = 0; i < currRegisteredStrArray.length; i++)
+                currRegisteredStrArray[i] = String.valueOf(currRegisteredCourses.get(i));
+            strRegisteredCourses = String.join(",", currRegisteredStrArray);
+        }
+        return "Student: " + userName + "\nCourses: [" + strRegisteredCourses + "]";
     }
 
     public boolean isRegisteredToCourse(BGRSMessageProtocol client,short courseNum){

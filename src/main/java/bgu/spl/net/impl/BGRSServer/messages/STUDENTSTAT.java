@@ -13,7 +13,7 @@ public class STUDENTSTAT extends Message{
     @Override
     public Message process(BGRSMessageProtocol myClient) {
         Database dataBase = Database.getInstance();
-        if (!dataBase.isClientLoggedIn(myClient) || !dataBase.isAdmin(myClient) || !dataBase.isUserExist(myRequestedStatsUserName) ||dataBase.isAdmin(myRequestedStatsUserName))
+        if (!dataBase.isClientLoggedIn(myClient) || !dataBase.isAdmin(myClient) || !dataBase.isUserExist(myRequestedStatsUserName) || dataBase.isAdmin(myRequestedStatsUserName))
             //if the client isn't logged in or he *isn't a admin* or the requested User doesn't exist on the system or the requested user is not an student (means he is a admin).
             return new ERROR(myOpCode);
         else

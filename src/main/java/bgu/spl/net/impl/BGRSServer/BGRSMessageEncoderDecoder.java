@@ -29,14 +29,14 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
         //End message per case without including the zero byte that indicates about the end of the message
         if (nextByte == '\0' && endMessageZeroBytes == 1) { //opcode must be 8 here.
-            userName = new String(bytes, 2 , len, StandardCharsets.US_ASCII);
+            userName = new String(bytes, 2 , len-2, StandardCharsets.US_ASCII);
             messageFromClient = new STUDENTSTAT(userName);
             return popMessage();
         }
 
         if(endMessageZeroBytes == 2 && nextByte == '\0'){
             if(secondZeroByte) { //if secondZeroByte=false its mean its the first time we encounter a zero byte so in the next zerobyte encounter we want to popString the message.
-                password = new String(bytes, beginPointerForPassword, len, StandardCharsets.US_ASCII);
+                password = new String(bytes, beginPointerForPassword, len-1, StandardCharsets.US_ASCII);
                 if(opcode==1) { //If its ADMINREG Message
                     messageFromClient = new ADMINREG(userName, password);
                     System.out.println("testing: ADMINREG RECIVED: Username: " + userName + " Passowrd: " + password);
@@ -120,14 +120,14 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
             byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + 1]; // plus one for the zeroByte
             System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,ackShortsMessageBytes.length); // we got the shorts in the array
             finalACKMessageBytes[4] = '\0';
-            return finalACKMessageBytes;
+           return finalACKMessageBytes;
         }
         //if the string isn't empty.
         String strReply = currACK.getMyStringReply();
         byte[] strBytes = strReply.getBytes(StandardCharsets.US_ASCII);
         byte[] finalACKMessageBytes = new byte[ackShortsMessageBytes.length + strBytes.length + 1]; // plus one for the zeroByte
-        System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,finalACKMessageBytes.length); //now we got shorts in the array
-        System.arraycopy(strBytes,0,finalACKMessageBytes,finalACKMessageBytes.length,strBytes.length); //now we got shorts + String in the array
+        System.arraycopy(ackShortsMessageBytes,0,finalACKMessageBytes,0,ackShortsMessageBytes.length); //now we got shorts in the array
+        System.arraycopy(strBytes,0,finalACKMessageBytes,ackShortsMessageBytes.length,strBytes.length); //now we got shorts + String in the array
         finalACKMessageBytes[finalACKMessageBytes.length-1] = '\0'; //now the Final ACK MESSAGE bytes are ready.
         return finalACKMessageBytes;
     }

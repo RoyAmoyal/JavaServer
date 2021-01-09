@@ -44,7 +44,7 @@ public class Course {
     };
 
     public boolean registerToMyCourse(User e){ //the database check before if that user is already registered to the course so we don't have to worry about it.
-        if(myRegisteredStudents.size()<=myNumOfMaxStudents){
+        if(myRegisteredStudents.size()<myNumOfMaxStudents){
             myRegisteredStudents.add(e);
             return true;
         }

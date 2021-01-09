@@ -15,7 +15,7 @@ public class Student extends User{
     }
 
     public void unRegisterToCourse(short courseNum){
-        myRegisteredCourses.remove(courseNum);
+        myRegisteredCourses.remove(Short.valueOf(courseNum));
     }
 
     public ArrayList<Short> getMyRegisteredCourses() {
