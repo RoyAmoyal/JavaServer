@@ -199,14 +199,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
     /*COURSE METHODS*/
     public boolean registerToNewCourse(short courseNum,BGRSMessageProtocol client){ // the method isAdmin should be called before this method to check if the client is a student.
-            if(!isCourseExist(courseNum) || isAdmin(client) || !clientsLoggedIn.containsKey(client)) // return false if The course doesn't exist/the client isn't a student/the client isn't logged it
+            if(!isCourseExist(courseNum) || !clientsLoggedIn.containsKey(client) || isAdmin(client)) // return false if The course doesn't exist/the client isn't a student/the client isn't logged it
                 return false;
+            synchronized (registerLock){
             Course currCourse = coursesList.get(courseNum);
             ArrayList<Short> currKdamCoursesRequired = currCourse.getMyKdamCoursesList();
             String currStudentName = clientsLoggedIn.get(client);
-            Student currStudent = (Student)usersList.get(currStudentName);
+            Student currStudent = (Student)(usersList.get(currStudentName));
             ArrayList<Short> currStudentRegisteredCourses = currStudent.getMyRegisteredCourses();
-            if(currStudentRegisteredCourses.contains(courseNum)) //if the student is already registered to that course.
+            if(isRegisteredToCourse(client,courseNum)) //if the student is already registered to that course.
                 return false;
             for (Short shortItem : currKdamCoursesRequired) {
                 if (!currStudentRegisteredCourses.contains(shortItem))
@@ -217,6 +218,7 @@ import java.util.concurrent.ConcurrentHashMap;
             currStudent.registerToNewCourse(courseNum);
             return true;
         }
+    }
 
       public boolean isCourseExist(short courseNum){
           if(coursesList.containsKey(courseNum))
@@ -231,23 +233,29 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
         public String getCourseStatString(short courseNum){ //we have to implement this method here because its thread safe (with synchronized)
-            Course currCourse = coursesList.get(courseNum);
-          ArrayList<User> currRegisteredStudents = currCourse.getMyRegisteredStudents();
-          String fullStrRegistered;
-          if(currRegisteredStudents.size()==0)
-              fullStrRegistered = "[]";
-          else {
-              String[] currRegisteredStrArray = new String[currRegisteredStudents.size()];
-              for (int i = 0; i < currRegisteredStrArray.length; i++)
-                  currRegisteredStrArray[i] = currRegisteredStudents.get(i).getUserName();
-              Arrays.sort(currRegisteredStrArray); // sort to alphabetical order of names.
-              fullStrRegistered = "[" + String.join(",", currRegisteredStrArray) + "]";
-          }
-          int currFreeSeats = currCourse.getFreeSeatsNum();
-          int maxSeats = currCourse.getMyNumOfMaxStudents();
-          String fullStrAvailableSeats = String.valueOf(currFreeSeats) + "/" + String.valueOf(maxSeats);
-            return "Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
-                                      "\nStudents Registered: " + fullStrRegistered;
+            synchronized (coursesList) {
+                Course currCourse = coursesList.get(courseNum);
+                ArrayList<User> currRegisteredStudents = currCourse.getMyRegisteredStudents();
+                String fullStrRegistered;
+                if (currRegisteredStudents.size() == 0)
+                    fullStrRegistered = "[]";
+                else {
+                    String[] currRegisteredStrArray = new String[currRegisteredStudents.size()];
+                    for (int i = 0; i < currRegisteredStrArray.length; i++) {
+                        currRegisteredStrArray[i] = currRegisteredStudents.get(i).getUserName();
+                    }
+                    Arrays.sort(currRegisteredStrArray); // sort to alphabetical order of names.
+                    fullStrRegistered = "[" + String.join(",", currRegisteredStrArray) + "]";
+                }
+                int currFreeSeats = currCourse.getFreeSeatsNum();
+                int maxSeats = currCourse.getMyNumOfMaxStudents();
+
+                String fullStrAvailableSeats = String.valueOf(currFreeSeats) + "/" + String.valueOf(maxSeats);
+                System.out.println("Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
+                        "\nStudents Registered: " + fullStrRegistered);
+                return "Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
+                        "\nStudents Registered: " + fullStrRegistered;
+            }
         }
 
     /*COURSE METHODS*/
@@ -257,7 +265,7 @@ import java.util.concurrent.ConcurrentHashMap;
         ArrayList<Short> currRegisteredCourses = currStudent.getMyRegisteredCourses();
         String strRegisteredCourses;
         if(currRegisteredCourses.size()==0)
-            strRegisteredCourses = "[]";
+            strRegisteredCourses = "";
         else {
             Collections.sort(currRegisteredCourses, new Comparator<Short>() { //sort
                 @Override
@@ -276,20 +284,23 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     public boolean isRegisteredToCourse(BGRSMessageProtocol client,short courseNum){
-        String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
-        ArrayList<Short> currRegisteredCourses = ((Student)usersList.get(clientUserName)).getMyRegisteredCourses();
-        return currRegisteredCourses.contains(courseNum);
+        synchronized (registerLock) {
+            String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+            ArrayList<Short> currRegisteredCourses = ((Student) usersList.get(clientUserName)).getMyRegisteredCourses();
+            return currRegisteredCourses.contains(Short.valueOf(courseNum));
+        }
     }
 
-    public boolean unRegisterToCourse(BGRSMessageProtocol client,short courseNum){
-        synchronized (registerLock){
-        if(!isRegisteredToCourse(client,courseNum)) //if the user is unregistered to that course he cant unRegister again so return false
-            return false;
+    public boolean unRegisterToCourse(BGRSMessageProtocol client,short courseNum) {
+        synchronized (registerLock) {
+            if (!isRegisteredToCourse(client, courseNum)) //if the user is unregistered to that course he cant unRegister again so return false
+                return false;
 
-        String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
-        ((Student) usersList.get(clientUserName)).unRegisterToCourse(courseNum);
+            String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+            ((Student) usersList.get(clientUserName)).unRegisterToCourse(courseNum);
+
+            return true;
         }
-        return true;
     }
 
     public String getMyCoursesStr(BGRSMessageProtocol client){

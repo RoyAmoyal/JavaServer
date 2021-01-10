@@ -36,10 +36,9 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
 
         if(endMessageZeroBytes == 2 && nextByte == '\0'){
             if(secondZeroByte) { //if secondZeroByte=false its mean its the first time we encounter a zero byte so in the next zerobyte encounter we want to popString the message.
-                password = new String(bytes, beginPointerForPassword, len-1, StandardCharsets.US_ASCII);
+                password = new String(bytes, beginPointerForPassword, len-beginPointerForPassword, StandardCharsets.US_ASCII);
                 if(opcode==1) { //If its ADMINREG Message
                     messageFromClient = new ADMINREG(userName, password);
-                    System.out.println("testing: ADMINREG RECIVED: Username: " + userName + " Passowrd: " + password);
                 }
                 else if(opcode==2)
                     messageFromClient = new STUDENTREG(userName,password);
@@ -47,17 +46,16 @@ public class BGRSMessageEncoderDecoder implements MessageEncoderDecoder<Message>
                     messageFromClient = new LOGIN(userName,password);
                 return popMessage();
             }
-            userName = new String(bytes, 2 , len-1, StandardCharsets.US_ASCII);
+            userName = new String(bytes, 2 , len-2, StandardCharsets.US_ASCII);
             secondZeroByte = true;
             beginPointerForPassword = len + 1; //this is the first zero byte so from the next byte the password begin.
         }
-        System.out.println("testing: Pushing byte num: " + len+1);
-        pushByte(nextByte);
+
+            pushByte(nextByte);
 
         //End Message: for the cases we don't have a terminate byte.
         if(len==2) { //we finished to read the opcode on the previous byte
             opcode = opcodeDecoder();
-            System.out.println("test: opcode recived is: " + opcode);
             setEndMessageZeroBytesByOpcode(opcode);
             if(endMessageZeroBytes==-1) { // if the message doesn't contain '\0' for end message and it contains only the opcode.
                 if (opcode == 4)

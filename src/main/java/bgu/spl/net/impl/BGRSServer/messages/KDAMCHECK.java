@@ -26,6 +26,7 @@ public class KDAMCHECK extends Message{
             return new ERROR(myOpCode);
         ArrayList<Short> tempKdamCourses = dataBase.getKdamCourses(myCourseNumber); //Kdam check doesn't change so we can do it here.
         String kdamCheckString = kdamCheckCoursesToString(tempKdamCourses);
+        System.out.println(kdamCheckString);
         return new ACK(myOpCode,kdamCheckString); //returns the list of the kdamCourses of myCourseNumber. Example: "[43,124,457]"
     }
 
@@ -33,7 +34,7 @@ public class KDAMCHECK extends Message{
     private String kdamCheckCoursesToString(ArrayList<Short> kdamCheckCourses){
         String[] tempStr = new String[kdamCheckCourses.size()];
         if(kdamCheckCourses.size()==0) //if there are not kdamcourses for that course we send empty string.
-            return "";
+            return "[]";
         for(int i=0;i<kdamCheckCourses.size();i++)
             tempStr[i] = String.valueOf(kdamCheckCourses.get(i));
         String kdamCheckStr = String.join(",",tempStr);

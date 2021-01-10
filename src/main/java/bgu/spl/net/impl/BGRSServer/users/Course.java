@@ -51,7 +51,7 @@ public class Course {
         return false;
     }
 
-    public ArrayList<User> getMyRegisteredStudents(){
+    public synchronized ArrayList<User> getMyRegisteredStudents(){
         return myRegisteredStudents;
     }
 
