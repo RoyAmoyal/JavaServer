@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
         private final ConcurrentHashMap<String, User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
         private final ConcurrentHashMap<BGRSMessageProtocol,String> clientsLoggedIn = new ConcurrentHashMap<>();
         private final Object registerLock = new Object();
-        ;
+
 
 
 
@@ -251,8 +251,7 @@ import java.util.concurrent.ConcurrentHashMap;
                 int maxSeats = currCourse.getMyNumOfMaxStudents();
 
                 String fullStrAvailableSeats = String.valueOf(currFreeSeats) + "/" + String.valueOf(maxSeats);
-                System.out.println("Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
-                        "\nStudents Registered: " + fullStrRegistered);
+
                 return "Course: (" + courseNum + ") " + currCourse.getMyCourseName() + "\nSeats Available: " + fullStrAvailableSeats +
                         "\nStudents Registered: " + fullStrRegistered;
             }
@@ -297,8 +296,10 @@ import java.util.concurrent.ConcurrentHashMap;
                 return false;
 
             String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
-            ((Student) usersList.get(clientUserName)).unRegisterToCourse(courseNum);
-
+	Student currStudent = (Student)usersList.get(clientUserName);
+            currStudent.unRegisterToCourse(courseNum);
+		Course currCourse = coursesList.get(courseNum);
+		currCourse.removeAstudentFromMyCourse(currStudent);
             return true;
         }
     }

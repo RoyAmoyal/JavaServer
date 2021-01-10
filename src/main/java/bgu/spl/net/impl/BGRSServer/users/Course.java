@@ -61,4 +61,8 @@ public class Course {
     }
 
 
+    public synchronized void removeAstudentFromMyCourse(Student currStudent) {
+        myRegisteredStudents.remove(currStudent);
+    }
+
 }
