@@ -8,6 +8,7 @@ public class ReactorMain {
             System.out.println("Please Enter a port and the number of threads");
             return;
         }
+       Database.getInstance();
         Server.reactor(
                 Integer.parseInt(args[1]),
                 Integer.parseInt(args[0]),

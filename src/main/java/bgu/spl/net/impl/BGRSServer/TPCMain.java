@@ -8,7 +8,7 @@ public class TPCMain {
             System.out.println("Please Enter a port and the number of threads");
             return;
         }
-
+        Database.getInstance();
         Server.threadPerClient(
                 Integer.parseInt(args[0]),
                 () -> new BGRSMessageProtocol(), () -> new BGRSMessageEncoderDecoder()
