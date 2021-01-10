@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
         private final ConcurrentHashMap<String, User> usersList = new ConcurrentHashMap<>(); // CHECK IF BETTER TO SPLIT THE ADMINS AND THE STUDENTS SYNCHRONIZED
         private final ConcurrentHashMap<BGRSMessageProtocol,String> clientsLoggedIn = new ConcurrentHashMap<>();
         private final Object registerLock = new Object();
-        private final Object logInOutLock = new Object();
+        ;
 
 
 
@@ -115,9 +115,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
     /* return true if he manage to add new admin
                  or false if there is a user with that username that is already registered */
-        public boolean addNewAdmin(String userName, String password) {
-            synchronized (registerLock) { // prevent 2 clients with the SAME NAME to register together
-                if (!isUserExist(userName)) { // if we don't have a user with that userName
+        public boolean addNewAdmin(String userName, String password,BGRSMessageProtocol client) {
+            synchronized (usersList) { // prevent 2 clients with the SAME NAME to register together
+                if (!isUserExist(userName) && !isClientLoggedIn(client)) { // if we don't have a user with that userName
                     usersList.put(userName, new Admin(userName, password));
                     return true; // The synchronized aware of that return and will release the key.
                 }
@@ -125,11 +125,11 @@ import java.util.concurrent.ConcurrentHashMap;
             }
         }
 
-        public boolean addNewStudent(String userName, String password) { //synchronized?
+        public boolean addNewStudent(String userName, String password,BGRSMessageProtocol client) { //synchronized?
              /* return true if he manage to add new admin
                     or false if there is a user with that username that is already registered */
-            synchronized (registerLock) { // prevent 2 clients with the same name to register together
-                if (!isUserExist(userName)) { // if we don't have a user with that userName
+            synchronized (usersList) { // prevent 2 clients with the same name to register together
+                if (!isUserExist(userName) && !isClientLoggedIn(client)) { // if we don't have a user with that userName
                     usersList.put(userName, new Student(userName, password));
                     return true; // The synchronized aware of that return and will release the key.
                 }
@@ -138,10 +138,13 @@ import java.util.concurrent.ConcurrentHashMap;
         }
 
 
+
          public boolean loginToTheSystem(String userName,String password, BGRSMessageProtocol client) { //this method is called by the protocol assuming isLoggedIn return false to the protocol
-             synchronized (logInOutLock) { // To prevent 2 clients to login in the same time, or one of them will logout while the other login.
+             synchronized (clientsLoggedIn) { // To prevent 2 clients to login in the same time, or one of them will logout while the other login.
                  //if the user exists in the system and the password is correct
-                 if (isUserExist(userName) && ((usersList.get(userName)).getPassword()).equals(password)){
+                 if(!isUserExist(userName) || isClientLoggedIn(client) || isUserLoggedIn(userName))
+                     return false;
+                 if (((usersList.get(userName)).getPassword()).equals(password)){
                      clientsLoggedIn.put(client,userName);
                      usersList.get(userName).logIn();
                      return true;
@@ -151,29 +154,35 @@ import java.util.concurrent.ConcurrentHashMap;
          }
 
          public void logoutFromTheSystem(BGRSMessageProtocol client){
-            String userToDisconnect = clientsLoggedIn.get(client); // gets the username of the user the client is logged in to.
-             usersList.get(userToDisconnect).logOut(); //logging out from the system
-             clientsLoggedIn.remove(client); // removes this client from the logged in clients list.
+            synchronized (clientsLoggedIn) {
+                String userToDisconnect = clientsLoggedIn.get(client); // gets the username of the user the client is logged in to.
+                usersList.get(userToDisconnect).logOut(); //logging out from the system
+                clientsLoggedIn.remove(client); // removes this client from the logged in clients list.
+            }
          }
 
          //methods that check login and courses list
 
          public boolean isClientLoggedIn(BGRSMessageProtocol client){
-            if(clientsLoggedIn.containsKey(client))
-                return true;
-            else
-                return false;
+                if (clientsLoggedIn.containsKey(client))
+                    return true;
+                else
+                    return false;
          }
 
          public boolean isUserLoggedIn(String userName){
-             if(usersList.get(userName).isLoggedIn())
-                 return true;
-            else
-                return false;
+            synchronized (clientsLoggedIn) {
+                if (usersList.get(userName).isLoggedIn())
+                    return true;
+                else
+                    return false;
+            }
          }
 
          public boolean isUserExist(String userName){
-            return usersList.containsKey(userName);
+            synchronized (usersList) {
+                return usersList.containsKey(userName);
+            }
          }
 
         public boolean isAdmin(BGRSMessageProtocol client){ //We assume we call this method after we check if the client logged-in. so if he loggedin the User must exist.
@@ -185,11 +194,11 @@ import java.util.concurrent.ConcurrentHashMap;
         public boolean isAdmin(String userName){ //We assume we call this method after we check if the a user with that userName exist. isUserExist()..
                 User currUser = usersList.get(userName);
                 return (currUser.getClass().equals(Admin.class));
-
         }
 
+
     /*COURSE METHODS*/
-    public synchronized boolean registerToNewCourse(short courseNum,BGRSMessageProtocol client){ // the method isAdmin should be called before this method to check if the client is a student.
+    public boolean registerToNewCourse(short courseNum,BGRSMessageProtocol client){ // the method isAdmin should be called before this method to check if the client is a student.
             if(!isCourseExist(courseNum) || isAdmin(client) || !clientsLoggedIn.containsKey(client)) // return false if The course doesn't exist/the client isn't a student/the client isn't logged it
                 return false;
             Course currCourse = coursesList.get(courseNum);
@@ -220,11 +229,8 @@ import java.util.concurrent.ConcurrentHashMap;
             return coursesList.get(courseNum).getMyKdamCoursesList(); // we already sorted the kdamCourses list of each course to the order of the file.
         }
 
-        public int getSeatsAvailable(short courseNum){
-            return coursesList.get(courseNum).getFreeSeatsNum();
-        }
 
-        public synchronized String getCourseStatString(short courseNum){ //we have to implement this method here because its thread safe (with synchronized)
+        public String getCourseStatString(short courseNum){ //we have to implement this method here because its thread safe (with synchronized)
             Course currCourse = coursesList.get(courseNum);
           ArrayList<User> currRegisteredStudents = currCourse.getMyRegisteredStudents();
           String fullStrRegistered;
@@ -246,7 +252,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
     /*COURSE METHODS*/
 
-    public synchronized String getStudentStatString(String userName){
+    public String getStudentStatString(String userName){
         Student currStudent = (Student)usersList.get(userName); //we assume we check before calling this method if that userName is a student on the system.
         ArrayList<Short> currRegisteredCourses = currStudent.getMyRegisteredCourses();
         String strRegisteredCourses;
@@ -259,10 +265,12 @@ import java.util.concurrent.ConcurrentHashMap;
                     return coursesList.get(o1).getMyRowInCoursesFile() - coursesList.get(o2).getMyRowInCoursesFile();
                 }
             });
-            String[] currRegisteredStrArray = new String[currRegisteredCourses.size()];
-            for (int i = 0; i < currRegisteredStrArray.length; i++)
-                currRegisteredStrArray[i] = String.valueOf(currRegisteredCourses.get(i));
-            strRegisteredCourses = String.join(",", currRegisteredStrArray);
+            synchronized (registerLock) {
+                String[] currRegisteredStrArray = new String[currRegisteredCourses.size()];
+                for (int i = 0; i < currRegisteredStrArray.length; i++)
+                    currRegisteredStrArray[i] = String.valueOf(currRegisteredCourses.get(i));
+                strRegisteredCourses = String.join(",", currRegisteredStrArray);
+            }
         }
         return "Student: " + userName + "\nCourses: [" + strRegisteredCourses + "]";
     }
@@ -274,10 +282,13 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     public boolean unRegisterToCourse(BGRSMessageProtocol client,short courseNum){
+        synchronized (registerLock){
         if(!isRegisteredToCourse(client,courseNum)) //if the user is unregistered to that course he cant unRegister again so return false
             return false;
+
         String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
-        ((Student)usersList.get(clientUserName)).unRegisterToCourse(courseNum);
+        ((Student) usersList.get(clientUserName)).unRegisterToCourse(courseNum);
+        }
         return true;
     }
 
