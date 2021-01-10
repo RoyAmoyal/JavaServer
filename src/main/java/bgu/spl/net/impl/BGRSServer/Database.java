@@ -209,8 +209,8 @@ import java.util.concurrent.ConcurrentHashMap;
             ArrayList<Short> currStudentRegisteredCourses = currStudent.getMyRegisteredCourses();
             if(isRegisteredToCourse(client,courseNum)) //if the student is already registered to that course.
                 return false;
-            for (Short shortItem : currKdamCoursesRequired) {
-                if (!currStudentRegisteredCourses.contains(shortItem))
+            for (Short shortItem: currKdamCoursesRequired) {
+                if (!currStudentRegisteredCourses.contains(Short.valueOf(shortItem)))
                     return false; //if one of the required kdam courses of that course is missing in the student's registered courses.
             }
             //if the student got all the kdam courses required for that course then he can register
@@ -285,8 +285,12 @@ import java.util.concurrent.ConcurrentHashMap;
     public boolean isRegisteredToCourse(BGRSMessageProtocol client,short courseNum){
         synchronized (registerLock) {
             String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
+            Student currStudent = ((Student) usersList.get(clientUserName));
             ArrayList<Short> currRegisteredCourses = ((Student) usersList.get(clientUserName)).getMyRegisteredCourses();
-            return currRegisteredCourses.contains(Short.valueOf(courseNum));
+            Course curCourse = coursesList.get(courseNum);
+            ArrayList<User> registeredToCurrCourse = curCourse.getMyRegisteredStudents();
+
+            return currRegisteredCourses.contains(courseNum) || registeredToCurrCourse.contains(currStudent);
         }
     }
 
