@@ -289,8 +289,7 @@ import java.util.concurrent.ConcurrentHashMap;
             ArrayList<Short> currRegisteredCourses = ((Student) usersList.get(clientUserName)).getMyRegisteredCourses();
             Course curCourse = coursesList.get(courseNum);
             ArrayList<User> registeredToCurrCourse = curCourse.getMyRegisteredStudents();
-
-            return currRegisteredCourses.contains(courseNum) || registeredToCurrCourse.contains(currStudent);
+            return (currRegisteredCourses.contains(courseNum) || registeredToCurrCourse.contains(currStudent));
         }
     }
 
@@ -300,7 +299,7 @@ import java.util.concurrent.ConcurrentHashMap;
                 return false;
 
             String clientUserName = clientsLoggedIn.get(client); // we assume we checked before if the client is logged-in as an student
-	Student currStudent = (Student)usersList.get(clientUserName);
+	    Student currStudent = (Student)usersList.get(clientUserName);
             currStudent.unRegisterToCourse(courseNum);
 		Course currCourse = coursesList.get(courseNum);
 		currCourse.removeAstudentFromMyCourse(currStudent);

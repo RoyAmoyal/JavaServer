@@ -26,7 +26,6 @@ public class KDAMCHECK extends Message{
             return new ERROR(myOpCode);
         ArrayList<Short> tempKdamCourses = dataBase.getKdamCourses(myCourseNumber); //Kdam check doesn't change so we can do it here.
         String kdamCheckString = kdamCheckCoursesToString(tempKdamCourses);
-        System.out.println(kdamCheckString);
         return new ACK(myOpCode,kdamCheckString); //returns the list of the kdamCourses of myCourseNumber. Example: "[43,124,457]"
     }
 
